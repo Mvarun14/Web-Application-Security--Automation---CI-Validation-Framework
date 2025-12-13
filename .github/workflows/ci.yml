@@ -1,0 +1,46 @@
+name: WebSecAppAuto CI
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  security-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Create virtual environment
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+
+      - name: Install dependencies
+        run: |
+          source .venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Initialize databases
+        run: |
+          source .venv/bin/activate
+          python init_dbs.py
+
+      - name: Run automated exploits
+        run: |
+          source .venv/bin/activate
+          python auto_exploit.py
+
+      - name: Run security tests
+        run: |
+          source .venv/bin/activate
+          pytest -q
